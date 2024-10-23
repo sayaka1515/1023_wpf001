@@ -1,4 +1,6 @@
-﻿using System.Numerics;
+﻿using Microsoft.Win32;
+using System.IO;
+using System.Numerics;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,14 +22,7 @@ namespace wpf001
         // 定義飲料品項及其價格
         Dictionary<string, int> drinks = new Dictionary<string, int>
         {
-            { "紅茶大杯", 60 },
-            { "紅茶小杯", 40 },
-            { "綠茶大杯", 50 },
-            { "綠茶小杯", 30 },
-            { "可樂大杯", 50 },
-            { "可樂小杯", 30 },
-            { "咖啡大杯", 80 },
-            { "咖啡小杯", 50 }
+
         };
 
         // 定義訂單內容
@@ -39,12 +34,35 @@ namespace wpf001
         {
             InitializeComponent();
 
+            AddNewDrink(drinks);
+
             // 顯示飲料品項
             DisplayDrinkMenu(drinks);
         }
 
         // 顯示飲料品項的方法
-        private void DisplayDrinkMenu(Dictionary<string, int> drinks)
+
+        private void AddNewDrink(Dictionary<string, int> drinks)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Title = "選擇飲料品項檔案";
+            openFileDialog.Filter = "CSV文件 |*.csv|文字檔案|*.txt|所有檔案 |*.*";
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string filename = openFileDialog.FileName;
+                string[] lines = File.ReadAllLines(filename);
+
+                foreach (var line in lines)
+                {
+                    string[] tokens = line.Split(',');
+                    string drinkName = tokens[0];
+                    int price = Convert.ToInt32(tokens[1]);
+                    drinks.Add(drinkName, price);
+                }
+            }
+        }
+            private void DisplayDrinkMenu(Dictionary<string, int> drinks)
         {
             // 設定 stackpanel_DrinkMenu 的高度
             stackpanel_DrinkMenu.Height = 42 * drinks.Count;
@@ -157,7 +175,10 @@ namespace wpf001
             string discount_msg;
             int total = 0;
 
-            msg += $"此次訂購為{takeout}，訂購內容如下：\n";
+            DateTime datetime = DateTime.Now;
+
+            msg += $"訂購時間：{datetime.ToString("yyyy-MM-dd HH:mm:ss")}，此次訂購為{takeout}，訂購內容如下：\n\n";
+            
             int num = 1;
             foreach (var order in orders)
             {
@@ -186,6 +207,27 @@ namespace wpf001
 
             // 顯示結果
             ResultTextBlock.Text = msg;
-        }
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Title = "儲存訂購內容";
+            saveFileDialog.Filter = "文字檔案|*.txt|所有文件|*.*";
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                string filename = saveFileDialog.FileName;
+                try
+                {
+                    using (StreamWriter sw = new StreamWriter(filename))
+                    {
+                        sw.Write(msg);
+                    }
+                    MessageBox.Show("訂購內容已儲存。");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"儲存失敗: { ex.Message}");
+                }
+            }
+       }
     }
 }
