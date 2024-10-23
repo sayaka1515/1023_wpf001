@@ -34,6 +34,7 @@ namespace wpf001
         {
             InitializeComponent();
 
+            // 讀取飲料品項檔案
             AddNewDrink(drinks);
 
             // 顯示飲料品項
@@ -44,25 +45,26 @@ namespace wpf001
 
         private void AddNewDrink(Dictionary<string, int> drinks)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Title = "選擇飲料品項檔案";
-            openFileDialog.Filter = "CSV文件 |*.csv|文字檔案|*.txt|所有檔案 |*.*";
+            OpenFileDialog openFileDialog = new OpenFileDialog(); // 建立 OpenFileDialog 物件
+            openFileDialog.Title = "選擇飲料品項檔案"; // 設定對話框標題
+            openFileDialog.Filter = "CSV文件 |*.csv|文字檔案|*.txt|所有檔案 |*.*"; // 設定檔案過濾器
 
-            if (openFileDialog.ShowDialog() == true)
+            if (openFileDialog.ShowDialog() == true) // 顯示開啟檔案對話框，並檢查使用者是否選擇了檔案
             {
-                string filename = openFileDialog.FileName;
-                string[] lines = File.ReadAllLines(filename);
+                string filename = openFileDialog.FileName; // 取得使用者選擇的檔案名稱
+                string[] lines = File.ReadAllLines(filename); // 讀取檔案中的所有行
 
-                foreach (var line in lines)
+                foreach (var line in lines) // 逐行處理檔案內容
                 {
-                    string[] tokens = line.Split(',');
-                    string drinkName = tokens[0];
-                    int price = Convert.ToInt32(tokens[1]);
-                    drinks.Add(drinkName, price);
+                    string[] tokens = line.Split(','); // 將每行內容以逗號分隔
+                    string drinkName = tokens[0]; // 取得飲料名稱
+                    int price = Convert.ToInt32(tokens[1]); // 取得飲料價格並轉換為整數
+                    drinks.Add(drinkName, price); // 將飲料名稱和價格添加到 drinks 字典中
                 }
             }
         }
-            private void DisplayDrinkMenu(Dictionary<string, int> drinks)
+
+        private void DisplayDrinkMenu(Dictionary<string, int> drinks)
         {
             // 設定 stackpanel_DrinkMenu 的高度
             stackpanel_DrinkMenu.Height = 42 * drinks.Count;
@@ -208,26 +210,29 @@ namespace wpf001
             // 顯示結果
             ResultTextBlock.Text = msg;
 
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Title = "儲存訂購內容";
-            saveFileDialog.Filter = "文字檔案|*.txt|所有文件|*.*";
+            SaveFileDialog saveFileDialog = new SaveFileDialog(); // 建立 SaveFileDialog 物件
+            saveFileDialog.Title = "儲存訂購內容"; // 設定對話框標題
+            saveFileDialog.Filter = "文字檔案|*.txt|所有文件|*.*"; // 設定檔案過濾器
 
-            if (saveFileDialog.ShowDialog() == true)
+            if (saveFileDialog.ShowDialog() == true) // 顯示儲存檔案對話框，並檢查使用者是否選擇了檔案
             {
-                string filename = saveFileDialog.FileName;
+                string filename = saveFileDialog.FileName; // 取得使用者選擇的檔案名稱
                 try
                 {
+                    // 使用 StreamWriter 物件寫入檔案
                     using (StreamWriter sw = new StreamWriter(filename))
                     {
-                        sw.Write(msg);
+                        sw.Write(msg); // 將訂購內容寫入檔案
                     }
-                    MessageBox.Show("訂購內容已儲存。");
+                    MessageBox.Show("訂購內容已儲存。"); // 顯示成功訊息
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"儲存失敗: { ex.Message}");
+                    // 捕捉例外並顯示錯誤訊息
+                    MessageBox.Show($"儲存失敗: {ex.Message}");
                 }
             }
-       }
+
+        }
     }
 }
